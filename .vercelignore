@@ -1,0 +1,26 @@
+# Dependencies
+node_modules
+
+# Test
+coverage
+tests
+
+# Development
+.env
+.env.local
+*.log
+
+# IDE
+.idea
+.vscode
+
+# Git
+.git
+.github
+
+# Documentation
+docs
+
+# Temporary
+tmp
+*.tmp

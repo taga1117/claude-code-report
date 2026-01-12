@@ -20,5 +20,9 @@ export default {
     ],
     // 件名の最大長
     "subject-max-length": [2, "always", 100],
+    // 日本語対応: 大文字小文字のチェックを無効化
+    "subject-case": [0],
+    "body-leading-blank": [1, "always"],
+    "footer-leading-blank": [1, "always"],
   },
 };

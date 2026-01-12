@@ -8,6 +8,7 @@
     "doc": "docs"
   },
   "scripts": {
+    "dev": "echo 'Next.js setup required' && exit 1",
     "build": "tsc",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
