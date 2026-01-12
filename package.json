@@ -17,7 +17,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "db:push": "prisma db push"
+    "db:push": "prisma db push",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -30,12 +31,25 @@
     "url": "https://github.com/taga1117/claude-code-report/issues"
   },
   "homepage": "https://github.com/taga1117/claude-code-report#readme",
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
   "devDependencies": {
+    "@commitlint/cli": "^20.3.1",
+    "@commitlint/config-conventional": "^20.3.1",
     "@eslint/js": "^9.39.2",
     "@prisma/client": "^5.22.0",
     "@vitest/coverage-v8": "^4.0.17",
     "eslint": "^9.39.2",
     "globals": "^17.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.7.4",
     "prisma": "^5.22.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.52.0",
