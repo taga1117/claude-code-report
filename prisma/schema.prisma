@@ -1,0 +1,156 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// 営業担当者マスタ
+// ============================================
+model SalesPerson {
+  id           Int      @id @default(autoincrement()) @map("sales_person_id")
+  name         String   @db.VarChar(50)
+  email        String   @unique @db.VarChar(100)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  department   String   @db.VarChar(50)
+  managerId    Int?     @map("manager_id")
+  isManager    Boolean  @default(false) @map("is_manager")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // 自己参照リレーション（上長）
+  manager      SalesPerson?  @relation("ManagerSubordinates", fields: [managerId], references: [id])
+  subordinates SalesPerson[] @relation("ManagerSubordinates")
+
+  // 日報リレーション
+  dailyReports DailyReport[]
+
+  // コメントリレーション
+  comments Comment[]
+
+  @@map("sales_persons")
+}
+
+// ============================================
+// 顧客マスタ
+// ============================================
+model Customer {
+  id            Int      @id @default(autoincrement()) @map("customer_id")
+  customerName  String   @unique @map("customer_name") @db.VarChar(100)
+  address       String?  @db.VarChar(200)
+  phone         String?  @db.VarChar(20)
+  contactPerson String?  @map("contact_person") @db.VarChar(50)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // 訪問記録リレーション
+  visitRecords VisitRecord[]
+
+  @@map("customers")
+}
+
+// ============================================
+// 日報
+// ============================================
+model DailyReport {
+  id            Int          @id @default(autoincrement()) @map("report_id")
+  salesPersonId Int          @map("sales_person_id")
+  reportDate    DateTime     @map("report_date") @db.Date
+  status        ReportStatus @default(DRAFT)
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  // リレーション
+  salesPerson  SalesPerson   @relation(fields: [salesPersonId], references: [id])
+  visitRecords VisitRecord[]
+  problem      Problem?
+  plan         Plan?
+
+  // 1人1日1レポートのユニーク制約
+  @@unique([salesPersonId, reportDate])
+  @@map("daily_reports")
+}
+
+// 日報ステータス
+enum ReportStatus {
+  DRAFT     @map("draft")
+  SUBMITTED @map("submitted")
+  CONFIRMED @map("confirmed")
+}
+
+// ============================================
+// 訪問記録
+// ============================================
+model VisitRecord {
+  id           Int       @id @default(autoincrement()) @map("visit_id")
+  reportId     Int       @map("report_id")
+  customerId   Int       @map("customer_id")
+  visitContent String    @map("visit_content") @db.Text
+  visitTime    DateTime? @map("visit_time") @db.Time()
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  // リレーション
+  dailyReport DailyReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  customer    Customer    @relation(fields: [customerId], references: [id])
+
+  @@map("visit_records")
+}
+
+// ============================================
+// Problem（課題・相談）
+// ============================================
+model Problem {
+  id        Int      @id @default(autoincrement()) @map("problem_id")
+  reportId  Int      @unique @map("report_id")
+  content   String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // リレーション
+  dailyReport DailyReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  comments    Comment[]
+
+  @@map("problems")
+}
+
+// ============================================
+// Plan（明日やること）
+// ============================================
+model Plan {
+  id        Int      @id @default(autoincrement()) @map("plan_id")
+  reportId  Int      @unique @map("report_id")
+  content   String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // リレーション
+  dailyReport DailyReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  comments    Comment[]
+
+  @@map("plans")
+}
+
+// ============================================
+// コメント
+// ============================================
+model Comment {
+  id            Int      @id @default(autoincrement()) @map("comment_id")
+  salesPersonId Int      @map("sales_person_id")
+  problemId     Int?     @map("problem_id")
+  planId        Int?     @map("plan_id")
+  content       String   @db.Text
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // リレーション
+  salesPerson SalesPerson @relation(fields: [salesPersonId], references: [id])
+  problem     Problem?    @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  plan        Plan?       @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+}
