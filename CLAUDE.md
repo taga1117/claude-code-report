@@ -180,3 +180,12 @@ npm run lint
 # マイグレーション
 npm run migrate
 ```
+
+## 使用技術
+**言語** TypeScript
+**フレームワーク** Next.js(App Router)
+**UIコンポーネント** shadcn/ui + Tailwind CSS
+**APIスキーマ定義** OpenAPI(Zodによる検証)
+**DBスキーマ定義** Prisma.js
+**テスト** Vitest
+**デプロイ** Vercel
